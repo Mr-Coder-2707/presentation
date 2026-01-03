@@ -9,9 +9,15 @@ import os
 import json
 from typing import Dict, List, Set
 
-from ir_core.dataset_loader import DatasetLoader, Document, IRDataset
-from ir_core.pipeline import IRPipeline, RankedResult
-from ir_core.evaluation import Evaluator, format_evaluation_result
+try:
+    from ir_core.dataset_loader import DatasetLoader, Document, IRDataset
+    from ir_core.pipeline import IRPipeline, RankedResult
+    from ir_core.evaluation import Evaluator, format_evaluation_result
+except ImportError as e:
+    print(f"Error importing ir_core modules: {e}")
+    import traceback
+    traceback.print_exc()
+    raise
 
 app = Flask(__name__)
 app.secret_key = 'ir_system_secret_key_2024'
@@ -482,8 +488,26 @@ def set_relevance():
 
     return jsonify({'success': False, 'error': 'Query is required'})
 
+
+# Error handlers
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Not found'}), 404
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Log the error
+    import traceback
+    print(f"Unhandled exception: {e}")
+    traceback.print_exc()
+    return jsonify({'error': 'An error occurred', 'details': str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-
-# Vercel handler
-app = app
