@@ -17,11 +17,11 @@ app = Flask(__name__)
 app.secret_key = 'ir_system_secret_key_2024'
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = '/tmp/uploads' if os.environ.get('VERCEL') else 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx', 'doc', 'csv', 'json'}
 
 if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
@@ -482,6 +482,8 @@ def set_relevance():
 
     return jsonify({'success': False, 'error': 'Query is required'})
 
-
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+
+# Vercel handler
+app = app
